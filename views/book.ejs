@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halaman Menu</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+      html,
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      main {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center">MENU LIST</h1>
+
+      <form id="addBook" class="my-4">
+        <div class="input-group">
+          <input
+            type="text"
+            id="newTitle"
+            class="form-control"
+            placeholder="Add a new title..."
+            required />
+          <div class="input-group-append">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              style="background-color: #cfab8d; border-color: #cfab8d">
+              Add Book
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- List of Todos -->
+      <ul id="bookList" class="list-group">
+        <% book.forEach(book=> { %>
+        <li
+          class="list-group-item d-flex justify-content-between align-items-center">
+          <span><%= book.judul %></span>
+          <div>
+            <button
+              class="btn btn-sm btn-success mr-2 editBtn"
+              style="
+                background-color: #eceedf;
+                border-color: #eceedf;
+                color: #333;
+              "
+              data-id="<%= book.id %>">
+              Edit
+            </button>
+            <button
+              class="btn btn-sm btn-danger deleteBtn"
+              style="background-color: #cfab8d; border-color: #cfab8d"
+              data-id="<%= book.id %>">
+              Delete
+            </button>
+          </div>
+        </li>
+        <% }); %>
+      </ul>
+
+      <!-- Edit Todo Modal -->
+      <div
+        id="editModal"
+        class="modal fade"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="editModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editModalLabel">Edit Menu</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="editBook">
+                <div class="form-group">
+                  <label for="editJudul">Nama</label>
+                  <input
+                    type="text"
+                    id="editJudul"
+                    class="form-control"
+                    required />
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">
+                  Save Changes
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a
+        href="/"
+        class="btn btn-primary mt-3"
+        style="background-color: #cfab8d; border-color: #cfab8d"
+        >Go to Home</a
+      >
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 JS + Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        let editId;
+
+        // Add new todo
+        $("#addBook").on("submit", function (e) {
+          e.preventDefault();
+          const judul = $("#newTitle").val().trim();
+          if (judul) {
+            $.ajax({
+              url: "/buku",
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ judul: judul }),
+              success: function () {
+                location.reload();
+              },
+              error: function (error) {
+                console.error("Error adding title:", error.responseText);
+              },
+            });
+          }
+        });
+
+        // Delete a todo
+        $(".deleteBtn").on("click", function () {
+          const id = $(this).data("id");
+          $.ajax({
+            url: "/buku/" + id,
+            type: "DELETE",
+            success: function () {
+              location.reload();
+            },
+          });
+        });
+
+        // Show edit modal
+        $(".editBtn").on("click", function () {
+          editId = $(this).data("id");
+          const currentJudul = $(this).closest("li").find("span").text();
+          $("#editJudul").val(currentJudul);
+          $("#editModal").modal("show");
+        });
+
+        // Update todo
+        $("#editBook").on("submit", function (e) {
+          e.preventDefault();
+          const judul = $("#editJudul").val().trim();
+          if (judul) {
+            $.ajax({
+              url: "/buku/" + editId,
+              type: "PUT",
+              data: JSON.stringify({ judul: judul }),
+              contentType: "application/json",
+              success: function () {
+                location.reload();
+              },
+            });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
