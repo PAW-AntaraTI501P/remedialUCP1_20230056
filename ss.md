@@ -1,3 +1,4 @@
+![alt text](image-8.png)
 ini get ![alt text](image-1.png)
 
 tambah ![alt text](image-5.png)
